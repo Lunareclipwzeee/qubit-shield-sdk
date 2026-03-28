@@ -1,0 +1,19 @@
+{
+  "name": "qubit-shield-sdk",
+  "version": "1.0.0",
+  "description": "Quantum-inspired enterprise security SDK by LUNARECLIPSE",
+  "main": "src/sdk/index.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
+    "test": "node tests/test.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "author": "LUNARECLIPSE",
+  "license": "MIT"
+}
