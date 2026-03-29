@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QUBIT Shield — Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Raleway:wght@100;200;300&family=DM+Mono:wght@300;400&family=DM+Sans:wght@300;400&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#020812;--surface:#060f1e;--surface2:#0a1628;--cyan:#06b6d4;--white:#f0f6ff;--muted:#64748b;--border:rgba(6,182,212,0.15);--green:#10b981;--red:#ef4444;--yellow:#f59e0b;}
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--white);font-family:'DM Sans',sans-serif;min-height:100vh;}
+  *{cursor:none!important;}
+  #cur{position:fixed;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);}
+  #cur .c-dot{position:absolute;width:4px;height:4px;background:var(--cyan);border-radius:50%;top:50%;left:50%;transform:translate(-50%,-50%);}
+  #cur .c-h{position:absolute;width:20px;height:1px;background:var(--cyan);top:50%;left:50%;transform:translate(-50%,-50%);opacity:0.8;}
+  #cur .c-v{position:absolute;width:1px;height:20px;background:var(--cyan);top:50%;left:50%;transform:translate(-50%,-50%);opacity:0.8;}
+  #cur .c-ring{position:absolute;width:30px;height:30px;border:1px solid rgba(6,182,212,0.35);border-radius:50%;top:50%;left:50%;transform:translate(-50%,-50%);transition:width 0.2s,height 0.2s;}
+  #cur.hover .c-ring{width:46px;height:46px;}
+  body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(6,182,212,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(6,182,212,0.03) 1px,transparent 1px);background-size:64px 64px;pointer-events:none;z-index:0;}
+  .layout{display:grid;grid-template-columns:220px 1fr;min-height:100vh;}
+  .sidebar{background:var(--surface);border-right:1px solid var(--border);padding:32px 24px;position:sticky;top:0;height:100vh;display:flex;flex-direction:column;}
+  .sb-logo{font-family:'Raleway',sans-serif;font-weight:200;font-size:13px;letter-spacing:0.22em;text-transform:uppercase;color:var(--muted);margin-bottom:4px;}
+  .sb-logo span{color:var(--cyan);}
+  .sb-product{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.15em;text-transform:uppercase;color:var(--cyan);margin-bottom:40px;}
+  .sb-nav{display:flex;flex-direction:column;gap:2px;flex:1;}
+  .nb{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;padding:10px 12px;color:var(--muted);text-decoration:none;transition:all 0.2s;}
+  .nb:hover{color:var(--cyan);background:rgba(6,182,212,0.06);}
+  .sb-foot{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.08em;color:var(--muted);line-height:1.7;}
+  .main{padding:48px;position:relative;z-index:1;}
+  .mh{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:48px;}
+  .mt{font-family:'Raleway',sans-serif;font-weight:200;font-size:28px;letter-spacing:0.02em;margin-bottom:4px;}
+  .ms{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.12em;color:var(--muted);}
+  .pb{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.15em;text-transform:uppercase;padding:6px 16px;border:1px solid var(--green);color:var(--green);}
+  .sg{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--border);margin-bottom:1px;}
+  .sc{background:var(--surface);padding:28px 24px;}
+  .sl{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted);margin-bottom:8px;}
+  .sv{font-family:'Raleway',sans-serif;font-weight:200;font-size:40px;color:var(--cyan);line-height:1;}
+  .ss{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);margin-top:4px;}
+  .pbar{background:var(--surface);border:1px solid var(--border);padding:20px 24px;margin-bottom:1px;display:flex;align-items:center;gap:24px;}
+  .pl{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.15em;text-transform:uppercase;color:var(--muted);}
+  .pd{font-family:'Raleway',sans-serif;font-weight:200;font-size:24px;color:var(--green);margin-right:4px;}
+  .prb{flex:1;height:4px;background:var(--surface2);border-radius:2px;overflow:hidden;}
+  .prf{height:100%;background:var(--green);border-radius:2px;}
+  .ub{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;padding:8px 20px;border:1px solid var(--cyan);color:var(--cyan);text-decoration:none;transition:all 0.2s;white-space:nowrap;}
+  .ub:hover{background:var(--cyan);color:var(--bg);}
+  .sec{background:var(--surface);border:1px solid var(--border);margin-bottom:1px;position:relative;}
+  .sec::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,var(--cyan),transparent);}
+  .sh{padding:20px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+  .st{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:0.15em;text-transform:uppercase;color:var(--white);}
+  .sb2{padding:24px;}
+  .kd{font-family:'DM Mono',monospace;font-size:14px;color:var(--cyan);background:var(--surface2);padding:16px 20px;letter-spacing:0.04em;word-break:break-all;margin-bottom:12px;}
+  .cb{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.12em;text-transform:uppercase;padding:8px 20px;background:transparent;color:var(--cyan);border:1px solid var(--border);transition:all 0.2s;}
+  .cb:hover{background:var(--cyan);color:var(--bg);}
+  .cb.copied{background:var(--green);color:var(--bg);border-color:var(--green);}
+  .code{background:var(--surface2);padding:20px;font-family:'DM Mono',monospace;font-size:12px;line-height:1.8;color:var(--white);overflow-x:auto;}
+  .cm{color:var(--muted);}
+  .ck{color:var(--cyan);}
+  .cs{color:#86efac;}
+  .al{display:flex;flex-direction:column;gap:1px;}
+  .ai{display:flex;align-items:center;gap:16px;padding:14px 24px;background:var(--surface2);font-family:'DM Mono',monospace;font-size:11px;}
+  .ad{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
+  .ad.encrypt{background:var(--cyan);}
+  .ad.decrypt{background:var(--green);}
+  .ad.detect{background:var(--yellow);}
+  .ad.sign,.ad.signup{background:#818cf8;}
+  .aa{color:var(--white);width:80px;}
+  .at{color:var(--muted);flex:1;}
+  .am{color:var(--muted);}
+  .es{padding:40px;text-align:center;font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);letter-spacing:0.1em;}
+  .ld{display:flex;align-items:center;justify-content:center;min-height:300px;font-family:'DM Mono',monospace;font-size:12px;color:var(--muted);letter-spacing:0.1em;}
+  @media(max-width:768px){.layout{grid-template-columns:1fr;}.sidebar{display:none;}.sg{grid-template-columns:1fr 1fr;}.main{padding:24px;}}
+</style>
+</head>
+<body>
+<div id="cur"><div class="c-ring"></div><div class="c-h"></div><div class="c-v"></div><div class="c-dot"></div></div>
+<div class="layout">
+  <div class="sidebar">
+    <div class="sb-logo">LUNAR<span>ECLIPSE</span></div>
+    <div class="sb-product">QUBIT Shield</div>
+    <nav class="sb-nav">
+      <a href="#" class="nb">⬡ Overview</a>
+      <a href="#" class="nb">⬡ API Key</a>
+      <a href="#" class="nb">⬡ Usage</a>
+      <a href="#" class="nb">⬡ Quickstart</a>
+      <a href="#" class="nb">⬡ Billing</a>
+    </nav>
+    <div class="sb-foot">Support<br>murthybondu7@gmail.com<br><br>© 2026 LUNARECLIPSE</div>
+  </div>
+  <div class="main" id="mainContent">
+    <div class="ld">Loading your dashboard...</div>
+  </div>
+</div>
+<script>
+const cur=document.getElementById('cur');
+document.addEventListener('mousemove',e=>{cur.style.left=e.clientX+'px';cur.style.top=e.clientY+'px';});
+document.querySelectorAll('a,button').forEach(el=>{el.addEventListener('mouseenter',()=>cur.classList.add('hover'));el.addEventListener('mouseleave',()=>cur.classList.remove('hover'));});
+const API=window.location.origin;
+const params=new URLSearchParams(window.location.search);
+const apiKey=params.get('key')||localStorage.getItem('qs_api_key');
+if(!apiKey){window.location.href='/signup';}
+if(apiKey)localStorage.setItem('qs_api_key',apiKey);
+async function loadDashboard(){
+  try{
+    const res=await fetch(API+'/platform/dashboard?key='+apiKey);
+    const data=await res.json();
+    if(!data.ok)throw new Error(data.error);
+    render(data);
+  }catch(err){
+    document.getElementById('mainContent').innerHTML='<div style="text-align:center;padding:80px;font-family:DM Mono,monospace;color:var(--red);">Error: '+err.message+'<br><br><a href="/signup" style="color:var(--cyan);">Sign up for a new key</a></div>';
+  }
+}
+function render(data){
+  const {account,usage,billing}=data;
+  const daysLeft=account.pilotDaysRemaining;
+  const progress=daysLeft!==null?Math.min(100,(daysLeft/30)*100):100;
+  document.getElementById('mainContent').innerHTML=`
+    <div class="mh">
+      <div><div class="mt">Welcome back, ${account.name.split(' ')[0]}.</div><div class="ms">${account.company} · ${account.email}</div></div>
+      <div class="pb">${account.plan.toUpperCase()} · ACTIVE</div>
+    </div>
+    <div class="sg">
+      <div class="sc"><div class="sl">Total Encryptions</div><div class="sv">${usage.totalEncryptions.toLocaleString()}</div><div class="ss">All time</div></div>
+      <div class="sc"><div class="sl">This Month</div><div class="sv">${usage.thisMonth.toLocaleString()}</div><div class="ss">${new Date().toLocaleString('default',{month:'long'})}</div></div>
+      <div class="sc"><div class="sl">Pilot Days Left</div><div class="sv" style="color:var(--green)">${daysLeft!==null?daysLeft:'∞'}</div><div class="ss">Free pilot</div></div>
+      <div class="sc"><div class="sl">Estimated Bill</div><div class="sv" style="font-size:28px;">${billing.currentPlan==='pilot'?'₹0':'₹'+billing.estimatedBill.toLocaleString()}</div><div class="ss">${billing.currentPlan==='pilot'?'Pilot — free':'This month'}</div></div>
+    </div>
+    ${account.plan==='pilot'?`
+    <div class="pbar">
+      <div><div class="pl">Pilot Period</div><div style="display:flex;align-items:baseline;gap:4px;margin-top:4px;"><span class="pd">${daysLeft}</span><span style="font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);">days remaining</span></div></div>
+      <div class="prb"><div class="prf" style="width:${progress}%"></div></div>
+      <a href="mailto:murthybondu7@gmail.com?subject=QUBIT Shield Upgrade" class="ub">Upgrade Plan</a>
+    </div>`:''}
+    <div class="sec" style="margin-top:1px;">
+      <div class="sh"><div class="st">Your API Key</div><div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);">Keep this secret</div></div>
+      <div class="sb2"><div class="kd" id="kd">${account.apiKey}</div><button class="cb" id="cpb" onclick="copyKey('${account.apiKey}')">Copy API Key</button></div>
+    </div>
+    <div class="sec">
+      <div class="sh"><div class="st">Quickstart</div></div>
+      <div class="sb2"><div class="code">
+<span class="cm">// 1. Install</span>
+npm install qubit-shield-sdk
+
+<span class="cm">// 2. Initialize</span>
+<span class="ck">const</span> { QubitShield } = require(<span class="cs">'qubit-shield-sdk'</span>);
+<span class="ck">const</span> qs = <span class="ck">new</span> QubitShield({ apiKey: <span class="cs">'${account.apiKey}'</span> });
+
+<span class="cm">// 3. Encrypt</span>
+<span class="ck">const</span> { envelope } = <span class="ck">await</span> qs.encrypt(<span class="cs">'your data'</span>);
+
+<span class="cm">// 4. Decrypt</span>
+<span class="ck">const</span> { text } = <span class="ck">await</span> qs.decrypt(envelope);
+      </div></div>
+    </div>
+    <div class="sec">
+      <div class="sh"><div class="st">Recent Activity</div><div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);">Last 10 calls</div></div>
+      <div class="al">
+        ${usage.recentActivity.length===0?'<div class="es">No API calls yet — make your first encryption above</div>':
+          usage.recentActivity.map(u=>`<div class="ai"><div class="ad ${u.action}"></div><div class="aa">${u.action}</div><div class="at">${new Date(u.created_at).toLocaleString()}</div><div class="am">${u.ms}ms</div></div>`).join('')}
+      </div>
+    </div>
+    <div class="sec">
+      <div class="sh"><div class="st">Billing</div></div>
+      <div class="sb2">
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1px;background:var(--border);">
+          <div style="background:var(--surface2);padding:20px;"><div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted);margin-bottom:8px;">Current Plan</div><div style="font-family:'Raleway',sans-serif;font-weight:200;font-size:22px;">${account.plan==='pilot'?'Free Pilot':'Paid'}</div></div>
+          <div style="background:var(--surface2);padding:20px;"><div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted);margin-bottom:8px;">This Month</div><div style="font-family:'Raleway',sans-serif;font-weight:200;font-size:22px;color:var(--cyan);">${billing.currentPlan==='pilot'?'₹0':'₹'+billing.estimatedBill.toLocaleString()}</div></div>
+          <div style="background:var(--surface2);padding:20px;"><div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted);margin-bottom:8px;">Next Billing</div><div style="font-family:'Raleway',sans-serif;font-weight:200;font-size:16px;">${billing.nextBillingDate?new Date(billing.nextBillingDate).toLocaleDateString():'Monthly'}</div></div>
+        </div>
+        <div style="margin-top:16px;"><a href="mailto:murthybondu7@gmail.com?subject=QUBIT Shield Upgrade" class="ub">Upgrade to Paid Plan</a></div>
+      </div>
+    </div>`;
+  document.querySelectorAll('a,button').forEach(el=>{el.addEventListener('mouseenter',()=>cur.classList.add('hover'));el.addEventListener('mouseleave',()=>cur.classList.remove('hover'));});
+}
+function copyKey(key){navigator.clipboard.writeText(key).then(()=>{const btn=document.getElementById('cpb');if(btn){btn.textContent='Copied ✓';btn.classList.add('copied');setTimeout(()=>{btn.textContent='Copy API Key';btn.classList.remove('copied');},2000);}});}
+loadDashboard();
+setInterval(loadDashboard,30000);
+</script>
+</body>
+</html>

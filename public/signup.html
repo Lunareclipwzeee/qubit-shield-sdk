@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QUBIT Shield — Get Your API Key</title>
+<link href="https://fonts.googleapis.com/css2?family=Raleway:wght@100;200;300&family=DM+Mono:wght@300;400&family=DM+Sans:wght@300;400&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#020812;--surface:#060f1e;--surface2:#0a1628;--cyan:#06b6d4;--white:#f0f6ff;--muted:#64748b;--border:rgba(6,182,212,0.15);--green:#10b981;--red:#ef4444;}
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--white);font-family:'DM Sans',sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 20px;}
+  *{cursor:none!important;}
+  #cur{position:fixed;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);}
+  #cur .c-dot{position:absolute;width:4px;height:4px;background:var(--cyan);border-radius:50%;top:50%;left:50%;transform:translate(-50%,-50%);}
+  #cur .c-h{position:absolute;width:20px;height:1px;background:var(--cyan);top:50%;left:50%;transform:translate(-50%,-50%);opacity:0.8;}
+  #cur .c-v{position:absolute;width:1px;height:20px;background:var(--cyan);top:50%;left:50%;transform:translate(-50%,-50%);opacity:0.8;}
+  #cur .c-ring{position:absolute;width:30px;height:30px;border:1px solid rgba(6,182,212,0.35);border-radius:50%;top:50%;left:50%;transform:translate(-50%,-50%);transition:width 0.2s,height 0.2s;}
+  #cur.hover .c-ring{width:46px;height:46px;}
+  body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(6,182,212,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(6,182,212,0.03) 1px,transparent 1px);background-size:64px 64px;pointer-events:none;z-index:0;}
+  .container{width:100%;max-width:480px;position:relative;z-index:1;}
+  .logo{font-family:'Raleway',sans-serif;font-weight:200;font-size:14px;letter-spacing:0.22em;text-transform:uppercase;color:var(--muted);text-align:center;margin-bottom:8px;}
+  .logo span{color:var(--cyan);}
+  h1{font-family:'Raleway',sans-serif;font-weight:200;font-size:32px;letter-spacing:0.02em;text-align:center;margin-bottom:8px;}
+  .subtitle{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:0.12em;color:var(--muted);text-align:center;margin-bottom:48px;}
+  .card{background:var(--surface);border:1px solid var(--border);padding:40px;position:relative;}
+  .card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,var(--cyan),transparent);}
+  .pilot-badge{display:flex;align-items:center;gap:8px;background:rgba(16,185,129,0.08);border:1px solid rgba(16,185,129,0.2);padding:10px 16px;margin-bottom:32px;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:0.1em;color:var(--green);}
+  .pilot-badge::before{content:'';width:6px;height:6px;background:var(--green);border-radius:50%;flex-shrink:0;}
+  .form-group{margin-bottom:20px;}
+  label{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:8px;}
+  input,select{width:100%;background:var(--surface2);border:1px solid var(--border);padding:14px 16px;font-family:'DM Mono',monospace;font-size:13px;color:var(--white);outline:none;transition:border-color 0.2s;}
+  input:focus,select:focus{border-color:var(--cyan);}
+  input::placeholder{color:var(--muted);}
+  select option{background:var(--surface2);}
+  .btn{width:100%;font-family:'DM Mono',monospace;font-size:12px;letter-spacing:0.1em;text-transform:uppercase;padding:16px;background:var(--cyan);color:var(--bg);border:none;margin-top:8px;transition:opacity 0.2s;font-weight:500;}
+  .btn:hover{opacity:0.85;}
+  .btn:disabled{opacity:0.4;pointer-events:none;}
+  .terms{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.08em;color:var(--muted);text-align:center;margin-top:16px;line-height:1.6;}
+  .success{display:none;}
+  .success-icon{width:48px;height:48px;background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.3);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 24px;font-size:20px;}
+  .success h2{font-family:'Raleway',sans-serif;font-weight:200;font-size:24px;text-align:center;margin-bottom:8px;}
+  .success .sub{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);text-align:center;margin-bottom:32px;letter-spacing:0.08em;}
+  .api-key-box{background:var(--surface2);border:1px solid rgba(16,185,129,0.3);padding:20px;margin-bottom:24px;}
+  .api-key-label{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.2em;text-transform:uppercase;color:var(--green);margin-bottom:8px;}
+  .api-key-value{font-family:'DM Mono',monospace;font-size:13px;color:var(--white);word-break:break-all;line-height:1.5;}
+  .copy-btn{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.12em;text-transform:uppercase;padding:8px 16px;background:transparent;color:var(--cyan);border:1px solid var(--border);margin-top:12px;transition:all 0.2s;}
+  .copy-btn:hover{background:var(--cyan);color:var(--bg);}
+  .copy-btn.copied{background:var(--green);color:var(--bg);border-color:var(--green);}
+  .pilot-info{display:flex;gap:16px;margin-bottom:24px;}
+  .pi-item{flex:1;background:var(--surface2);padding:16px;text-align:center;}
+  .pi-num{font-family:'Raleway',sans-serif;font-weight:200;font-size:32px;color:var(--cyan);line-height:1;}
+  .pi-lbl{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.15em;text-transform:uppercase;color:var(--muted);margin-top:4px;}
+  .dash-btn{display:block;width:100%;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;padding:14px;background:var(--cyan);color:var(--bg);text-align:center;text-decoration:none;margin-top:8px;}
+  .error-msg{background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.3);padding:12px 16px;font-family:'DM Mono',monospace;font-size:11px;color:var(--red);margin-bottom:16px;display:none;}
+  .back-link{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.12em;color:var(--muted);text-align:center;margin-top:24px;text-decoration:none;display:block;transition:color 0.2s;}
+  .back-link:hover{color:var(--cyan);}
+</style>
+</head>
+<body>
+<div id="cur"><div class="c-ring"></div><div class="c-h"></div><div class="c-v"></div><div class="c-dot"></div></div>
+<div class="container">
+  <div class="logo">A LUNAR<span>ECLIPSE</span> Technology</div>
+  <h1>Get Your API Key</h1>
+  <p class="subtitle">30-day free pilot · No credit card required</p>
+  <div class="card" id="formCard">
+    <div class="pilot-badge">30-day free pilot — Full access, zero cost</div>
+    <div class="error-msg" id="errorMsg"></div>
+    <div class="form-group"><label>Your Name</label><input type="text" id="name" placeholder="Rajesh Kumar"/></div>
+    <div class="form-group"><label>Work Email</label><input type="email" id="email" placeholder="cto@yourcompany.com"/></div>
+    <div class="form-group"><label>Company Name</label><input type="text" id="company" placeholder="Your Company Pvt Ltd"/></div>
+    <div class="form-group"><label>Your Role</label><select id="role"><option value="CTO">CTO</option><option value="Developer">Developer</option><option value="Security Engineer">Security Engineer</option><option value="Founder">Founder</option><option value="Other">Other</option></select></div>
+    <button class="btn" id="signupBtn" onclick="doSignup()">Get My API Key</button>
+    <div class="terms">No spam. No credit card. Cancel anytime.</div>
+  </div>
+  <div class="card success" id="successCard">
+    <div class="success-icon">✓</div>
+    <h2>You are in.</h2>
+    <p class="sub">Your 30-day pilot has started. Copy your API key below.</p>
+    <div class="api-key-box">
+      <div class="api-key-label">Your API Key</div>
+      <div class="api-key-value" id="apiKeyDisplay">—</div>
+      <button class="copy-btn" id="copyBtn" onclick="copyKey()">Copy API Key</button>
+    </div>
+    <div class="pilot-info">
+      <div class="pi-item"><div class="pi-num">30</div><div class="pi-lbl">Days Free</div></div>
+      <div class="pi-item"><div class="pi-num">∞</div><div class="pi-lbl">Encryptions</div></div>
+      <div class="pi-item"><div class="pi-num">₹0</div><div class="pi-lbl">Cost Today</div></div>
+    </div>
+    <a href="#" class="dash-btn" id="dashLink">View My Dashboard</a>
+  </div>
+  <a href="/" class="back-link">← Back to QUBIT Shield</a>
+</div>
+<script>
+const cur=document.getElementById('cur');
+document.addEventListener('mousemove',e=>{cur.style.left=e.clientX+'px';cur.style.top=e.clientY+'px';});
+document.querySelectorAll('a,button,input,select').forEach(el=>{el.addEventListener('mouseenter',()=>cur.classList.add('hover'));el.addEventListener('mouseleave',()=>cur.classList.remove('hover'));});
+const API=window.location.origin;
+let currentKey='';
+async function doSignup(){
+  const name=document.getElementById('name').value.trim();
+  const email=document.getElementById('email').value.trim();
+  const company=document.getElementById('company').value.trim();
+  const role=document.getElementById('role').value;
+  const btn=document.getElementById('signupBtn');
+  const errEl=document.getElementById('errorMsg');
+  errEl.style.display='none';
+  if(!name||!email||!company){errEl.textContent='Please fill in all fields.';errEl.style.display='block';return;}
+  btn.disabled=true;btn.textContent='Generating quantum key...';
+  try{
+    const res=await fetch(API+'/platform/signup',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name,email,company,role})});
+    const data=await res.json();
+    if(!data.ok)throw new Error(data.error);
+    currentKey=data.apiKey;
+    document.getElementById('apiKeyDisplay').textContent=data.apiKey;
+    document.getElementById('dashLink').href='/dashboard?key='+data.apiKey;
+    document.getElementById('formCard').style.display='none';
+    document.getElementById('successCard').style.display='block';
+  }catch(err){errEl.textContent=err.message;errEl.style.display='block';btn.disabled=false;btn.textContent='Get My API Key';}
+}
+function copyKey(){navigator.clipboard.writeText(currentKey).then(()=>{const btn=document.getElementById('copyBtn');btn.textContent='Copied ✓';btn.classList.add('copied');setTimeout(()=>{btn.textContent='Copy API Key';btn.classList.remove('copied');},2000);});}
+document.addEventListener('keydown',e=>{if(e.key==='Enter')doSignup();});
+</script>
+</body>
+</html>
