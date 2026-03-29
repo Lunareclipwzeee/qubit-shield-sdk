@@ -87,7 +87,7 @@ async function sendEmail(to, name, company, apiKey) {
 </div>
 
 <div style="text-align:center;margin-top:32px;">
-<a href="https://qubitshield.netlify.app/dashboard" style="display:inline-block;background:#06b6d4;color:#020812;padding:14px 32px;text-decoration:none;font-size:12px;letter-spacing:2px;text-transform:uppercase;font-weight:600;">View Dashboard</a>
+<a href="https://qubitshield.netlify.app/dashboard?key='+apiKey+'" style="display:inline-block;background:#06b6d4;color:#020812;padding:14px 32px;text-decoration:none;font-size:12px;letter-spacing:2px;text-transform:uppercase;font-weight:600;">View Dashboard</a>
 </div>
 </td></tr>
 
