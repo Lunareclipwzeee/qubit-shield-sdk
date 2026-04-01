@@ -185,7 +185,7 @@
     <li><a href="#demo">Live Demo</a></li>
     <li><a href="#pricing">Pricing</a></li>
   </ul>
-  <a href="https://qubit-shield.onrender.com/signup" class="nav-cta">Get API Key</a>
+  <a href="https://qubit-shield-sdk-production.up.railway.app/signup" class="nav-cta">Get API Key</a>
 </nav>
 <div class="hero">
   <div class="rings"><div class="ring ring-1"></div><div class="ring ring-2"></div><div class="ring ring-3"></div></div>
@@ -331,7 +331,7 @@ const { tampered, score } = await qs.detect(envelope);</pre>
   <h2 class="ctatitle">Quantum computers are coming.<br>Be ready today.</h2>
   <p class="ctasub">India's first post-quantum cryptography SDK. NIST certified. Enterprise ready. Free 30-day pilot.</p>
   <div class="ctabtns">
-    <a href="https://qubit-shield.onrender.com/signup" class="btn-p">Request Early Access</a>
+    <a href="https://qubit-shield-sdk-production.up.railway.app/signup" class="btn-p">Request Early Access</a>
     <a href="mailto:murthybondu7@gmail.com?subject=QUBIT Shield Whitepaper" class="btn-s">Get the Whitepaper</a>
   </div>
 </div>
@@ -347,7 +347,7 @@ document.querySelectorAll('a,button,textarea').forEach(el=>{el.addEventListener(
 function runDotType(el,delay){if(el.dataset.typed)return;el.dataset.typed='1';const text=el.dataset.text||'';el.innerHTML='';const spans=[];for(let i=0;i<text.length;i++){const s=document.createElement('span');s.className='dt-char is-dot';s.textContent=text[i]===' '?'\u00a0':text[i];el.appendChild(s);spans.push(s);}spans.forEach((s,i)=>setTimeout(()=>{s.classList.remove('is-dot');s.classList.add('is-reveal');},delay+i*55));}
 const obs=new IntersectionObserver(entries=>{entries.forEach(e=>{if(!e.isIntersecting)return;e.target.classList.add('visible');e.target.querySelectorAll('.dot-type').forEach((el,i)=>setTimeout(()=>runDotType(el,0),i*180));});},{threshold:0.1});
 document.querySelectorAll('.reveal').forEach(r=>obs.observe(r));
-const API='https://qubit-shield.onrender.com';
+const API='https://qubit-shield-sdk-production.up.railway.app';
 const AKEY='qs_live_lunareclipse_demo_2026';
 let env=null;
 function setDemoStatus(state,text){document.getElementById('demoStatusDot').className='sdot '+state;document.getElementById('demoStatusText').textContent=text;}

@@ -99,7 +99,7 @@
   <div class="nav-links">
     <a href="/">Home</a>
     <a href="/signup">Sign Up</a>
-    <a href="https://qubit-shield.onrender.com/v1/health" target="_blank">API Status</a>
+    <a href="https://qubit-shield-sdk-production.up.railway.app/v1/health" target="_blank">API Status</a>
   </div>
 </nav>
 <div class="main">
@@ -172,7 +172,7 @@ const cur=document.getElementById('cur');
 document.addEventListener('mousemove',e=>{cur.style.left=e.clientX+'px';cur.style.top=e.clientY+'px';});
 document.querySelectorAll('a,button,input').forEach(el=>{el.addEventListener('mouseenter',()=>cur.classList.add('hover'));el.addEventListener('mouseleave',()=>cur.classList.remove('hover'));});
 
-const API='https://qubit-shield.onrender.com';
+const API='https://qubit-shield-sdk-production.up.railway.app';
 let currentKey='';
 
 // Auto-load if key in URL
