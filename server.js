@@ -4,6 +4,7 @@ const crypto  = require('crypto');
 const path    = require('path');
 const https   = require('https');
 const { QubitShield } = require('./src/sdk/index');
+const { QubitVault } = require('./src/vault');
 
 const app  = express();
 const PORT = process.env.PORT || 3000;
@@ -227,6 +228,55 @@ app.post('/v1/verify', authenticate, (req,res) => {
     logUsage(req.company.api_key,'verify',0);
     res.json({ ok:true, ...req.qs.verify(data,signature) });
   } catch(err) { res.status(400).json({ ok:false, error:err.message }); }
+});
+
+
+// ═══════════════════════════════════════════
+//  QUBIT VAULT ROUTES
+// ═══════════════════════════════════════════
+function requireVault(req,res,next){
+  if(['pilot','shield','enterprise'].includes(req.company.plan)) return next();
+  return res.status(403).json({ok:false,error:'QUBIT Vault requires Shield or Enterprise plan',upgrade:'mailto:murthybondu7@gmail.com?subject=Upgrade to Shield Plan'});
+}
+app.post('/v1/vault/credential',authenticate,requireVault,(req,res)=>{
+  try{
+    const{subject,scope,ttl,metadata}=req.body;
+    if(!subject) return res.status(400).json({ok:false,error:'subject is required'});
+    if(!scope) return res.status(400).json({ok:false,error:'scope is required'});
+    const result=QubitVault.generateCredential({subject,scope,ttlSeconds:ttl||300,apiKey:req.company.api_key,metadata:metadata||{}});
+    logUsage(req.company.api_key,'vault_generate',0);
+    res.status(201).json({ok:true,credentialId:result.credentialId,signature:result.credential.signature,publicKey:result.credential.publicKey,algorithm:result.credential.algorithm,subject:result.credential.subject,scope:result.credential.scope,expiresIn:result.expiresIn,expiresAt:result.expiresAt,singleUse:true});
+  }catch(err){res.status(400).json({ok:false,error:err.message});}
+});
+app.post('/v1/vault/verify',authenticate,requireVault,(req,res)=>{
+  try{
+    const{credentialId,signature}=req.body;
+    if(!credentialId||!signature) return res.status(400).json({ok:false,error:'credentialId and signature required'});
+    const result=QubitVault.verifyCredential(credentialId,signature);
+    logUsage(req.company.api_key,'vault_verify',0);
+    res.json({ok:true,...result});
+  }catch(err){res.status(400).json({ok:false,error:err.message});}
+});
+app.post('/v1/vault/revoke',authenticate,requireVault,(req,res)=>{
+  try{
+    const{credentialId}=req.body;
+    if(!credentialId) return res.status(400).json({ok:false,error:'credentialId is required'});
+    const result=QubitVault.revokeCredential(credentialId,req.company.api_key);
+    logUsage(req.company.api_key,'vault_revoke',0);
+    res.json({ok:true,...result});
+  }catch(err){res.status(400).json({ok:false,error:err.message});}
+});
+app.get('/v1/vault/credentials',authenticate,requireVault,(req,res)=>{
+  try{
+    const result=QubitVault.listCredentials(req.company.api_key);
+    res.json({ok:true,...result});
+  }catch(err){res.status(400).json({ok:false,error:err.message});}
+});
+app.get('/v1/vault/stats',authenticate,requireVault,(req,res)=>{
+  try{
+    const stats=QubitVault.stats(req.company.api_key);
+    res.json({ok:true,stats});
+  }catch(err){res.status(400).json({ok:false,error:err.message});}
 });
 
 app.use((req,res) => res.status(404).json({ ok:false, error:'Not found' }));
