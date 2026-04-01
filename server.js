@@ -5,7 +5,8 @@ const path    = require('path');
 const https   = require('https');
 const { Pool } = require('pg');
 const { QubitShield } = require('./src/sdk/index');
-const { QubitVault }  = require('./src/vault');
+const { QubitVault }    = require('./src/vault');
+const { QubitSentinel } = require('./src/sentinel');
 
 process.on('uncaughtException', err => { console.error('UNCAUGHT:', err.message); });
 process.on('unhandledRejection', err => { console.error('UNHANDLED:', err.message); });
@@ -234,6 +235,59 @@ app.get('/v1/vault/credentials',authenticate,requireVault,(req,res)=>{
 app.get('/v1/vault/stats',authenticate,requireVault,(req,res)=>{
   try{
     const stats=QubitVault.stats(req.company.api_key);
+    res.json({ok:true,stats});
+  }catch(err){res.status(400).json({ok:false,error:err.message});}
+});
+
+
+// ═══════════════════════════════════════════
+//  QUBIT SENTINEL ROUTES
+//  Available on: Enterprise plan (₹10L)
+// ═══════════════════════════════════════════
+function requireSentinel(req,res,next){
+  if(['pilot','enterprise'].includes(req.company.plan)) return next();
+  return res.status(403).json({ok:false,error:'QUBIT Sentinel requires Enterprise plan',upgrade:'mailto:murthybondu7@gmail.com?subject=Upgrade to Enterprise'});
+}
+app.post('/v1/sentinel/monitor',authenticate,requireSentinel,async(req,res)=>{
+  try{
+    const{objectId,data,label,ttl,alertThreshold}=req.body;
+    const result=QubitSentinel.monitor({objectId,data,label,apiKey:req.company.api_key,ttlSeconds:ttl||3600,alertThreshold:alertThreshold||0.25});
+    await logUsage(req.company.api_key,'sentinel_monitor',0);
+    res.status(201).json({ok:true,...result});
+  }catch(err){res.status(400).json({ok:false,error:err.message});}
+});
+app.post('/v1/sentinel/scan',authenticate,requireSentinel,async(req,res)=>{
+  try{
+    const{objectId,currentData}=req.body;
+    if(!objectId||currentData===undefined) return res.status(400).json({ok:false,error:'objectId and currentData required'});
+    const result=QubitSentinel.scan({objectId,currentData,apiKey:req.company.api_key});
+    await logUsage(req.company.api_key,'sentinel_scan',0);
+    res.json({ok:true,...result});
+  }catch(err){res.status(400).json({ok:false,error:err.message});}
+});
+app.get('/v1/sentinel/alerts',authenticate,requireSentinel,async(req,res)=>{
+  try{
+    const result=QubitSentinel.getAlerts(req.company.api_key,{status:req.query.status||'all',limit:parseInt(req.query.limit)||50});
+    res.json({ok:true,...result});
+  }catch(err){res.status(400).json({ok:false,error:err.message});}
+});
+app.post('/v1/sentinel/resolve',authenticate,requireSentinel,async(req,res)=>{
+  try{
+    const{alertId,resolution}=req.body;
+    if(!alertId) return res.status(400).json({ok:false,error:'alertId is required'});
+    const result=QubitSentinel.resolveAlert(alertId,req.company.api_key,resolution);
+    res.json({ok:true,...result});
+  }catch(err){res.status(400).json({ok:false,error:err.message});}
+});
+app.get('/v1/sentinel/monitored',authenticate,requireSentinel,(req,res)=>{
+  try{
+    const result=QubitSentinel.listMonitored(req.company.api_key);
+    res.json({ok:true,...result});
+  }catch(err){res.status(400).json({ok:false,error:err.message});}
+});
+app.get('/v1/sentinel/stats',authenticate,requireSentinel,(req,res)=>{
+  try{
+    const stats=QubitSentinel.stats(req.company.api_key);
     res.json({ok:true,stats});
   }catch(err){res.status(400).json({ok:false,error:err.message});}
 });
