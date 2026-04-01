@@ -5,6 +5,3 @@ builder = "nixpacks"
 startCommand = "node server.js"
 restartPolicyType = "on_failure"
 restartPolicyMaxRetries = 3
-
-[[deploy.healthcheckPath]]
-path = "/v1/health"
