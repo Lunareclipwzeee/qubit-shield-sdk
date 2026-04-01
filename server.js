@@ -240,7 +240,7 @@ app.get('/v1/vault/stats',authenticate,requireVault,(req,res)=>{
 
 app.use((req,res)=>res.status(404).json({ok:false,error:'Not found'}));
 
-app.listen(PORT,()=>{
+app.listen(PORT,'0.0.0.0',()=>{
   console.log('');
   console.log('╔══════════════════════════════════════════╗');
   console.log('║   QUBIT SHIELD PLATFORM — OPERATIONAL    ║');
