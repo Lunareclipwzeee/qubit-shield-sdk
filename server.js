@@ -7,6 +7,8 @@ const { Pool } = require('pg');
 const { QubitShield } = require('./src/sdk/index');
 const { QubitVault }  = require('./src/vault');
 
+process.on('uncaughtException', err => { console.error('UNCAUGHT:', err.message); });
+process.on('unhandledRejection', err => { console.error('UNHANDLED:', err.message); });
 const app  = express();
 const PORT = process.env.PORT || 3000;
 const RESEND_API_KEY = process.env.RESEND_API_KEY || '';
@@ -18,6 +20,7 @@ const pool = new Pool({
 });
 
 async function initDb() {
+  console.log('Connecting to DB:', process.env.DATABASE_URL ? 'URL found' : 'NO URL');
   await pool.query(`
     CREATE TABLE IF NOT EXISTS companies (
       id SERIAL PRIMARY KEY,
