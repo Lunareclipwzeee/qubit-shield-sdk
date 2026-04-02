@@ -9,7 +9,10 @@
     "test": "node tests/test.js"
   },
   "dependencies": {
+    "@dashlane/pqc-kem-kyber768-node": "^1.0.0",
+    "@noble/post-quantum": "^0.5.3",
     "express": "^4.18.2",
+    "mlkem": "^2.7.0",
     "pg": "^8.20.0"
   },
   "engines": {
