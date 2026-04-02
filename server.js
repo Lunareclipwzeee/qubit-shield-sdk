@@ -114,7 +114,7 @@ async function authenticate(req,res,next) {
   }
   const company=await getCompanyByKey(token);
   if(!company) return res.status(401).json({ok:false,error:'API key not found — sign up at qubitshield.netlify.app/signup'});
-  if(!isPilotActive(company)) return res.status(402).json({ok:false,error:'Pilot expired — upgrade plan'});
+  if(!isPilotActive(company)) return res.status(402).json({ok:false,error:'Pilot expired — choose a plan to continue',upgradeUrl:`/upgrade?key=${token}&expired=true`});
   try { req.qs=new QubitShield({apiKey:token}); } catch(e) { return res.status(401).json({ok:false,error:'Invalid API key'}); }
   req.company=company;
   next();
@@ -324,6 +324,53 @@ app.get('/admin/getkey',async(req,res)=>{
   const company=await getCompanyByEmail(email);
   if(!company) return res.status(404).json({ok:false,error:'not found'});
   res.json({ok:true,apiKey:company.api_key,name:company.name,company:company.company,pilotEnd:company.pilot_end});
+});
+
+
+// POST /platform/upgrade-request — Customer requests plan upgrade
+app.post('/platform/upgrade-request',async(req,res)=>{
+  try{
+    const{apiKey,email,company,plan,price,message}=req.body;
+    if(!apiKey||!email||!plan) return res.status(400).json({ok:false,error:'apiKey, email and plan required'});
+    const c=await getCompanyByKey(apiKey);
+    if(!c) return res.status(404).json({ok:false,error:'API key not found'});
+
+    // Send email to you
+    const html=`<div style="background:#020812;padding:40px;font-family:Arial,sans-serif;color:#f0f6ff;">
+      <h2 style="color:#06b6d4;">New Plan Upgrade Request</h2>
+      <p><strong>Company:</strong> ${company}</p>
+      <p><strong>Email:</strong> ${email}</p>
+      <p><strong>API Key:</strong> ${apiKey}</p>
+      <p><strong>Requested Plan:</strong> ${plan} — ${price}</p>
+      <p><strong>Message:</strong> ${message||'None'}</p>
+      <hr style="border-color:rgba(6,182,212,0.2);margin:24px 0;"/>
+      <p style="color:#64748b;font-size:12px;">To activate this plan, run:<br>
+      <code style="color:#06b6d4;">curl -X POST ${process.env.RAILWAY_PUBLIC_DOMAIN||'https://qubit-shield-sdk-production.up.railway.app'}/admin/setplan?secret=lunareclipse_admin_2026&apiKey=${apiKey}&plan=${plan}</code></p>
+    </div>`;
+
+    const payload=JSON.stringify({from:'QUBIT Shield <onboarding@resend.dev>',to:['murthybondu7@gmail.com'],subject:`QUBIT Shield — Plan Upgrade Request: ${plan} from ${company}`,html});
+    await new Promise((resolve,reject)=>{
+      const https=require('https');
+      const options={hostname:'api.resend.com',path:'/emails',method:'POST',headers:{'Authorization':`Bearer ${process.env.RESEND_API_KEY}`,'Content-Type':'application/json','Content-Length':Buffer.byteLength(payload)}};
+      const r=https.request(options,res=>{let d='';res.on('data',x=>d+=x);res.on('end',()=>resolve(d));});
+      r.on('error',reject);r.write(payload);r.end();
+    });
+
+    res.json({ok:true,message:'Upgrade request sent. We will activate your plan within 24 hours.'});
+  }catch(err){res.status(400).json({ok:false,error:err.message});}
+});
+
+// POST /admin/setplan — Activate a plan for a customer
+app.post('/admin/setplan',async(req,res)=>{
+  const secret=req.query.secret||req.body.secret;
+  if(secret!=='lunareclipse_admin_2026') return res.status(401).json({ok:false});
+  const{apiKey,plan}=req.query.apiKey?req.query:req.body;
+  if(!apiKey||!plan) return res.status(400).json({ok:false,error:'apiKey and plan required'});
+  const validPlans=['starter','shield','enterprise'];
+  if(!validPlans.includes(plan)) return res.status(400).json({ok:false,error:'Invalid plan. Use: starter, shield, enterprise'});
+  await pool.query('UPDATE companies SET plan=$1,status=$2 WHERE api_key=$3',[plan,'active',apiKey]);
+  const company=await getCompanyByKey(apiKey);
+  res.json({ok:true,message:`Plan updated to ${plan}`,company:company.name,email:company.email,plan:company.plan});
 });
 
 app.use((req,res)=>res.status(404).json({ok:false,error:'Not found'}));
