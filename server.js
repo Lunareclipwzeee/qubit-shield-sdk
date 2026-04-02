@@ -105,9 +105,13 @@ async function sendEmail(to,name,company,apiKey) {
 const DEMO_KEY = 'qs_demo_lunareclipse_2026';
 
 async function authenticate(req,res,next) {
-
   const token=(req.headers['authorization']||'').replace('Bearer ','').trim();
   if(!token||!token.startsWith('qs_')) return res.status(401).json({ok:false,error:'Unauthorized'});
+  if(token===DEMO_KEY){
+    req.company={api_key:DEMO_KEY,name:'Demo',email:'demo@qubitshield.com',company:'Demo User',plan:'pilot',pilot_end:new Date(Date.now()+365*24*60*60*1000)};
+    try{req.qs=new QubitShield({apiKey:token});}catch(e){}
+    return next();
+  }
   const company=await getCompanyByKey(token);
   if(!company) return res.status(401).json({ok:false,error:'API key not found — sign up at qubitshield.netlify.app/signup'});
   if(!isPilotActive(company)) return res.status(402).json({ok:false,error:'Pilot expired — upgrade plan'});
