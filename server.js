@@ -315,6 +315,17 @@ app.get('/v1/sentinel/stats',authenticate,requireSentinel,(req,res)=>{
   }catch(err){res.status(400).json({ok:false,error:err.message});}
 });
 
+
+app.get('/admin/getkey',async(req,res)=>{
+  const secret=req.query.secret;
+  if(secret!=='lunareclipse_admin_2026') return res.status(401).json({ok:false});
+  const email=req.query.email;
+  if(!email) return res.status(400).json({ok:false,error:'email required'});
+  const company=await getCompanyByEmail(email);
+  if(!company) return res.status(404).json({ok:false,error:'not found'});
+  res.json({ok:true,apiKey:company.api_key,name:company.name,company:company.company,pilotEnd:company.pilot_end});
+});
+
 app.use((req,res)=>res.status(404).json({ok:false,error:'Not found'}));
 
 app.listen(PORT,'0.0.0.0',()=>{
